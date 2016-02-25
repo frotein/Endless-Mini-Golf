@@ -63,7 +63,7 @@ public class BallHitter : MonoBehaviour {
                         totalDist += Vector2.Distance(positions[i], positions[i - 1]);
                     }
 
-                    Debug.Log(powerAndDirection.magnitude  + " : " + totalDist);
+                    //Debug.Log(powerAndDirection.magnitude  + " : " + totalDist);
                 }
                 hit = false;        
             }
@@ -73,7 +73,34 @@ public class BallHitter : MonoBehaviour {
     public Vector2 CalculateStopPosition()
     {
         float magnitudeSquared = powerAndDirection.magnitude * powerAndDirection.magnitude;
-        return (Vector2)ball.position + powerAndDirection.normalized * (magnitudeSquared + (magnitudeSquared - 1) + .7f);
+        float distance = (magnitudeSquared + (magnitudeSquared - 1) + .7f); ;
+        Vector2 pos = (Vector2)ball.position;
+        Vector2 dir = powerAndDirection.normalized;
+        List<Vector2> hitPositions = new List<Vector2>();
+        bool hitSomething = true;
+        
+        while(hitSomething)
+        {
+            hitSomething = false;
+            RaycastHit2D[] rcHits = Physics2D.CircleCastAll(pos, ball.GetComponent<CircleCollider2D>().radius , dir, distance, 1 << 8);
+            
+            for (int i = 0; i < rcHits.Length; i++)
+            {
+                RaycastHit2D rcHit = rcHits[i];
+                if (!hitPositions.Contains(rcHit.centroid))
+                {
+                    hitSomething = true;
+                    dir = MyMath.Reflect(dir, rcHit.normal).normalized;
+                    pos = rcHit.centroid;
+                    distance -= rcHit.distance;
+                    hitPositions.Add(rcHit.centroid);
+                    i = rcHits.Length;
+                }
+            }              
+        }
+            
+        
+        return pos + dir * distance;
     }
     public void DrawPowerLine()
     {
@@ -106,10 +133,8 @@ public class BallHitter : MonoBehaviour {
 
     public void ShootBall()
     {
-        // test Code
-        powerAndDirection = new Vector2(0, 6f);
         positions.Clear();
-        ballRB.AddForce(powerAndDirection * 100);// * powerAndDirection.magnitude);
+        ballRB.AddForce(powerAndDirection * 100 * powerAndDirection.magnitude);
         positions.Add((Vector2)ball.position);
         showedDist = false;
         hit = true;

@@ -67,6 +67,7 @@
     <Compile Include="Assets\Scripts\BallPhysics.cs" />
     <Compile Include="Assets\Scripts\Controls.cs" />
     <Compile Include="Assets\Scripts\Extensions.cs" />
+    <Compile Include="Assets\Scripts\MyMath.cs" />
     <Compile Include="Assets\Tiled Sprite\Examples\TiledSpriteMain.cs" />
     <Compile Include="Assets\Tiled Sprite\Scripts\AssetMetaCache.cs" />
     <Compile Include="Assets\Tiled Sprite\Scripts\GameObjectUtils.cs" />
