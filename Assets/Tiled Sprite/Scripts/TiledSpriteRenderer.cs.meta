@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: e87989cbb5aad8a47bb48f159c2629d5
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - m_sprite: {instanceID: 0}
+  - m_material: {fileID: 10754, guid: 0000000000000000e000000000000000, type: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
