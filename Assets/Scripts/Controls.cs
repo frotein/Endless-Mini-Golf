@@ -6,10 +6,10 @@ using System.Collections;
 public static class Controls
 {
     static int touchCount;
+    static Vector2 worldPosition;
     public static bool Clicked()
     {
 
-        touchCount = Input.touchCount;
         // if its playihng on a mobile device, use touchEvents, otherwise use mouse
         if (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer)
             return (touchCount == 0 && Input.touchCount == 1);
@@ -20,24 +20,28 @@ public static class Controls
         
 	}
 
-	public static Vector2 ClickedPosition() // must make sure clicked is true
+	public static Vector2 ClickedPosition() // must make sure clicked is true if on mobile
 	{
-		Vector2 screenPosition;
+		Vector2 screenPosition = Vector2.zero;
 
         if (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer)
-            screenPosition = Input.touches[0].position;
-		else
+        {
+            if (Input.touchCount > 0)
+            {
+                screenPosition = Input.touches[0].position;
+            }
+        }
+        else
             screenPosition = Input.mousePosition;
 
-        return (Vector2)Camera.main.ScreenToWorldPoint(new Vector3(screenPosition.x,screenPosition.y,Camera.main.nearClipPlane)); 
+        worldPosition = (Vector2)Camera.main.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, Camera.main.nearClipPlane));
+        return worldPosition;
 	}
 
 	public static bool Released()
 	{
-        touchCount = Input.touchCount;
-
         if (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer)
-            return (Input.touchCount == 0); 
+            return (Input.touchCount == 0) && touchCount == 1; 
         else
             return Input.GetMouseButtonUp(0);
 

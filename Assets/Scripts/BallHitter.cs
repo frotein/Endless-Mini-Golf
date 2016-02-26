@@ -13,7 +13,6 @@ public class BallHitter : MonoBehaviour {
     Rigidbody2D ballRB;
     Vector2 startPos, endPos;
     public List<Vector2> positions;    
-    bool showedDist;
     int waitFrames;
     // Use this for initialization
 	void Start ()
@@ -27,34 +26,37 @@ public class BallHitter : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        if (ballRB.velocity.magnitude == 0)
+        if (ballRB.velocity.magnitude == 0) // if the ball is not moving...
         {
-            if (Controls.Clicked())
+            if (Controls.Clicked()) // if you click on the screen ...
             {
-                powerLine.gameObject.SetActive(true);
-                aiming = true;
+                powerLine.gameObject.SetActive(true); // turn on the power line
+                aiming = true; // say we are aiming
             }
-            if (aiming)
-            {
-                DrawPowerLine();
 
-                if (Controls.Released())
+            if (aiming) // if we are aiming
+            {
+               
+
+                if (Controls.Released()) // if we release our click
                 {
-                    ShootBall();
-                    aiming = false;
-                    powerLine.gameObject.SetActive(false);
+                    ShootBall(); // shoot the ball
+                    aiming = false; // say we are no longer aiming
+                    powerLine.gameObject.SetActive(false); // turn off power line
                 }
-            }
-            endPos = (Vector2)ball.position;
 
-            // Debug.Log(Vector2.Distance(startPos, endPos) + " : " + powerAndDirection.magnitude * powerAndDirection.magnitude);
-            landSpot.position = CalculateStopPosition().XYZ(landSpot.position.z);
+                DrawPowerLine(); // draw the power line
+            }
+
+           
 
             if (waitFrames > 0)
                 waitFrames--;
             else
             {
-                if(hit)
+                // debug code for calculating trajectory
+                landSpot.position = CalculateStopPosition().XYZ(landSpot.position.z);
+                if (hit)
                 {
                     positions.Add((Vector2)ball.position);
                     float totalDist = 0;
@@ -63,17 +65,23 @@ public class BallHitter : MonoBehaviour {
                         totalDist += Vector2.Distance(positions[i], positions[i - 1]);
                     }
 
-                    //Debug.Log(powerAndDirection.magnitude  + " : " + totalDist);
+                    
                 }
                 hit = false;        
             }
+            // end of debug code
         }
+
+        Controls.SetTouchCount(); // set touch count so mobile controls work
        
 	}
+
+    // Debug function, real one will be used in GenerateCourse
     public Vector2 CalculateStopPosition()
     {
         float magnitudeSquared = powerAndDirection.magnitude * powerAndDirection.magnitude;
-        float distance = (magnitudeSquared + (magnitudeSquared - 1) + .7f); ;
+        float drag = ballRB.drag;
+        float distance = (magnitudeSquared * (2 / drag)) - (.3f / drag);
         Vector2 pos = (Vector2)ball.position;
         Vector2 dir = powerAndDirection.normalized;
         List<Vector2> hitPositions = new List<Vector2>();
@@ -102,7 +110,9 @@ public class BallHitter : MonoBehaviour {
         
         return pos + dir * distance;
     }
-    public void DrawPowerLine()
+
+
+    public void DrawPowerLine() // Draws the power line from the ball to the clicked positin with min and max lengths
     {
         Vector2 mousePos = Controls.ClickedPosition();
         Vector2 ballPos = (Vector2)(ball.transform.position);
@@ -131,12 +141,11 @@ public class BallHitter : MonoBehaviour {
         powerAndDirection = dir * dist;
     }
 
-    public void ShootBall()
+    public void ShootBall() // shoots the ball based on the power set in draw power line
     {
         positions.Clear();
         ballRB.AddForce(powerAndDirection * 100 * powerAndDirection.magnitude);
         positions.Add((Vector2)ball.position);
-        showedDist = false;
         hit = true;
         waitFrames = 3;
     }
