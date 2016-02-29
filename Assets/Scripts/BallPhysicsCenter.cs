@@ -6,6 +6,7 @@ using System.Collections;
 public class BallPhysicsCenter : MonoBehaviour {
 
 
+    public GenerateCourse courseGenerator;
     Rigidbody2D physicsBody;
     public float fallInHoleMaximum; // the maximum movement speed to fall in the hole
     // Use this for initialization
@@ -21,6 +22,7 @@ public class BallPhysicsCenter : MonoBehaviour {
 
     public void OnTriggerStay2D(Collider2D other)
     {
+
         if (other.sharedMaterial != null) // sets the balls drag based on the what surface the center it is over
         {
             physicsBody.drag = other.sharedMaterial.friction;
@@ -31,7 +33,7 @@ public class BallPhysicsCenter : MonoBehaviour {
             if (physicsBody.velocity.magnitude < fallInHoleMaximum) // and slow enought ...
             {
                 // set, got in hole
-
+                courseGenerator.GenerateHole();
             }
         }
     }

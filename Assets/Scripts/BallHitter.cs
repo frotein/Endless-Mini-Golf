@@ -55,7 +55,7 @@ public class BallHitter : MonoBehaviour {
             else
             {
                 // debug code for calculating trajectory
-                landSpot.position = CalculateStopPosition().XYZ(landSpot.position.z);
+                //landSpot.position = CalculateStopPosition().XYZ(landSpot.position.z);
                 if (hit)
                 {
                     positions.Add((Vector2)ball.position);
@@ -144,7 +144,7 @@ public class BallHitter : MonoBehaviour {
     public void ShootBall() // shoots the ball based on the power set in draw power line
     {
         positions.Clear();
-        ballRB.AddForce(powerAndDirection * 100 * powerAndDirection.magnitude);
+        ballRB.AddForce(powerAndDirection * 80 * powerAndDirection.magnitude);
         positions.Add((Vector2)ball.position);
         hit = true;
         waitFrames = 3;
