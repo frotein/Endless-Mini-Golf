@@ -8,6 +8,8 @@ public class GenerateCourse : MonoBehaviour {
     public Transform ballStart;
     public Transform ground;
     public Transform wallsPool;
+    public Transform bounceRotator;
+    public Transform DebugPool; 
     public LineRenderer movementLine;
     public float minPower;
     public float maxPower;
@@ -23,6 +25,7 @@ public class GenerateCourse : MonoBehaviour {
     public Transform[] back2Points;
     List<BouncePoint> bouncePoints;
     public float maxDirectionX;
+
     // Use this for initialization
 	void Start ()
     {
@@ -55,6 +58,7 @@ public class GenerateCourse : MonoBehaviour {
             foreach (Vector2 point in positions)
             {
                 //Debug.Log(point);
+                
                 movementLine.SetPosition(i, point.XYZ(movementLine.transform.position.z));
 
                 i++;
@@ -81,7 +85,7 @@ public class GenerateCourse : MonoBehaviour {
         PlaceHole();
        
 
-       // GenerateGroundAndWalls();
+        GenerateGroundAndWalls();
     }
 
     // place the ball at the beginning
@@ -106,12 +110,14 @@ public class GenerateCourse : MonoBehaviour {
     void MakeGround(List<Vector2> corners)
     {
         groundMesh.keyPoints.Clear();
-
+        groundMesh.isCurve.Clear();
         Vector2[] pts = new Vector2[corners.Count];
         int i = 0;
         foreach (Vector2 point in corners)
         {
             groundMesh.keyPoints.Add(point);
+            groundMesh.isCurve.Add(false);
+            DebugPool.GetChild(i).position = point.XYZ(-5);
             pts[i] = point;
             i++;
         }
@@ -138,6 +144,23 @@ public class GenerateCourse : MonoBehaviour {
 
         }
     }
+    // creates the two points for the wall (and ground) based on the bounce point of index : index  
+    // List<Vector2> will always contain 2 points
+    List<Vector2> generateWallPoints(int index)
+    {
+        Vector2 minMaxLength = new Vector3(1, 5);
+        List<Vector2> pts = new List<Vector2>();
+        BouncePoint bp = bouncePoints[index];
+
+        float dist = Random.Range(minMaxLength.x, minMaxLength.y);
+        Vector2 pt1 = bp.position + -bp.direction * dist;
+        dist = Random.Range(minMaxLength.x, minMaxLength.y);
+        Vector2 pt2 = bp.position + bp.direction * dist;
+        pts.Add(pt1);
+        pts.Add(pt2);
+
+        return pts;
+    }
     // minimum of 4 points
     void GenerateGroundAndWalls()
     {
@@ -151,7 +174,16 @@ public class GenerateCourse : MonoBehaviour {
         {
             Vector2 start = positions[i];
             Vector2 end = positions[i + 1];
-
+            List<Vector2> bounceSides = generateWallPoints(i);
+            if(MyMath.LeftOfLine(bounceSides[0], bounceSides[1], end)) // if right wall
+            {
+                rightEndPoints.AddRange(bounceSides);
+            }
+            else
+            {
+                leftEndPoints.AddRange(bounceSides);
+                Debug.Log("should be runnig this");
+            }
         }
 
         endP = SetBack(positions[positions.Count - 2], positions[positions.Count - 1]);
@@ -170,7 +202,7 @@ public class GenerateCourse : MonoBehaviour {
     
     BouncePoint AddBouncePoint() // adds bounce to the last line of the current course line
     {
-        Vector2 minMaxBounceSpot = new Vector2(0.4f, 0.7f);
+        Vector2 minMaxBounceSpot = new Vector2(0.6f, 0.9f);
         float t = Random.Range(minMaxBounceSpot.x, minMaxBounceSpot.y);
         Vector2 start = positions[positions.Count - 2];
         Vector2 end = positions[positions.Count - 1];
@@ -198,9 +230,23 @@ public class GenerateCourse : MonoBehaviour {
 
     Vector2 GenerateRandomBounceVector()
     {
-        float bounceRange = 8f;
-        //Random.Range(bounceRange, -bounceRange)
-        return new Vector2(2,1).normalized;
+        bounceRotator.up = new Vector3(0, 1, 0);
+        Transform pt1 = bounceRotator.GetChild(0);
+        Transform pt2 = bounceRotator.GetChild(1);
+
+
+        float x = Random.Range(0.5f, 4f);
+        bool flip = Random.Range(0f, 1f) > 0.5f;
+
+        if (flip)
+            x = -x;
+        Vector2 ogRotation = new Vector2(1, 1).normalized;
+        pt1.position = bounceRotator.position - ogRotation.XYZ(0);
+        pt2.position = bounceRotator.position + ogRotation.XYZ(0);
+        Vector2 dir = (positions[positions.Count - 1] - positions[positions.Count - 2]).normalized;
+        bounceRotator.up = dir.XYZ(0);
+
+        return (pt2.position - pt1.position).XY().normalized; 
     }
     public void CalculateStopPosition() // returns the calculated positions in the positions List
     {
