@@ -140,7 +140,7 @@ public class GenerateCourse : MonoBehaviour {
             float distance = Vector2.Distance(start, end);
             wall.localScale = new Vector3(wall.localScale.x, distance + .15f, wall.localScale.z);
             wall.position = middle.XYZ(wall.position.z);
-            wall.right = perpDir.XYZ(wall.right.z);
+            wall.right = -perpDir.XYZ(wall.right.z);
 
         }
     }
@@ -161,6 +161,20 @@ public class GenerateCourse : MonoBehaviour {
 
         return pts;
     }
+
+    Vector2 GenerateOppositeSideWallPoint(Vector2 start, Vector2 end, bool left, float minOnLine = 0.3f)
+    {
+        float onLineT = Random.Range(minOnLine, 0.8f);
+        Vector2 OnLinePoint = (end - start) * onLineT + start;
+
+        Vector2 dir = (end - start).normalized;
+        Vector2 perpDir = new Vector2(dir.y, -dir.x);
+        if (left)
+            perpDir = -perpDir;
+        float offLineDist = Random.Range(0.25f, 1.5f);
+
+        return OnLinePoint + perpDir * offLineDist;
+    }
     // minimum of 4 points
     void GenerateGroundAndWalls()
     {
@@ -178,11 +192,12 @@ public class GenerateCourse : MonoBehaviour {
             if(MyMath.LeftOfLine(bounceSides[0], bounceSides[1], end)) // if right wall
             {
                 rightEndPoints.AddRange(bounceSides);
+                leftEndPoints.Add(GenerateOppositeSideWallPoint(start, end, true));
             }
             else
             {
                 leftEndPoints.AddRange(bounceSides);
-                Debug.Log("should be runnig this");
+                rightEndPoints.Add(GenerateOppositeSideWallPoint(start, end, false));
             }
         }
 
@@ -240,7 +255,7 @@ public class GenerateCourse : MonoBehaviour {
 
         if (flip)
             x = -x;
-        Vector2 ogRotation = new Vector2(1, 1).normalized;
+        Vector2 ogRotation = new Vector2(x, 1).normalized;
         pt1.position = bounceRotator.position - ogRotation.XYZ(0);
         pt2.position = bounceRotator.position + ogRotation.XYZ(0);
         Vector2 dir = (positions[positions.Count - 1] - positions[positions.Count - 2]).normalized;
@@ -317,8 +332,8 @@ public class GenerateCourse : MonoBehaviour {
     }
     BothSidesEndPoints SetBack(Vector2 start, Vector2 end)
     {
-        Vector2 RandBackRange = new Vector2(0.5f, 2.0f);
-        Vector2 RandSideRange = new Vector2(1f, 2.5f);
+        Vector2 RandBackRange = new Vector2(0.5f, 2.5f);
+        Vector2 RandSideRange = new Vector2(1f, 1.5f);
         float RandBack = Random.Range(RandBackRange.x, RandBackRange.y);
         bool evenBack = (symetrical) || Random.Range(0f, 1f) > 0.75;
         bool evenSides = (symetrical) || Random.Range(0f, 1f) > 0.65f;
