@@ -83,7 +83,7 @@ public class PolyMesh : MonoBehaviour
 		mesh.uv = uv;
 		mesh.triangles = triangles;
 		mesh.RecalculateNormals();
-		mesh.Optimize();
+		;
 		
 		//Update collider after the mesh is updated
 		UpdateCollider(points, triangles);
@@ -143,7 +143,7 @@ public class PolyMesh : MonoBehaviour
 			mesh.vertices = vertices.ToArray();
 			mesh.triangles = triangles.ToArray();
 			mesh.RecalculateNormals();
-			mesh.Optimize();
+			;
 			meshCollider.sharedMesh = null;
 			meshCollider.sharedMesh = mesh;
 		}
